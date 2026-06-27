@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id              String           @id @default(cuid())
+  name            String
+  city            String
+  monthlyBudget   Int              @default(8000)
+  orders          Order[]
+  mealHistory     MealHistory[]
+  healthSnapshots HealthSnapshot[]
+}
+
+model Order {
+  id       String   @id
+  userId   String
+  service  String
+  merchant String
+  date     String
+  amount   Int
+  discount Int      @default(0)
+  status   String   @default("delivered")
+  placedAt DateTime @default(now())
+  items    String   @default("[]")
+  user     User     @relation(fields: [userId], references: [id])
+}
+
+model MealHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  dish      String
+  servings  Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model HealthSnapshot {
+  id        String   @id @default(cuid())
+  userId    String
+  month     String
+  score     Int
+  data      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, month])
+}
