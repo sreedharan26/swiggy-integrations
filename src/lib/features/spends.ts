@@ -1,5 +1,5 @@
 import { cached } from "@/lib/cache";
-import { prisma } from "@/lib/db";
+import { prisma, ensureDbReady } from "@/lib/db";
 import { swiggy } from "@/lib/swiggy";
 import { CURRENT_MONTH, CURRENT_MONTH_LABEL } from "@/lib/swiggy/seed";
 import type { Coupon, Order, ServiceCategory } from "@/lib/swiggy/types";
@@ -42,6 +42,7 @@ function weekOfMonth(isoDate: string): number {
 }
 
 export async function getSpendsSummary(): Promise<SpendsSummary> {
+  await ensureDbReady();
   return cached("spends:summary:u_aarav:" + CURRENT_MONTH, 120, async () => {
     const [user, dbOrders] = await Promise.all([
       prisma.user.findUnique({ where: { id: "u_aarav" } }),

@@ -2,7 +2,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { cached, invalidateByPrefix } from "@/lib/cache";
 import { getModel, hasAI } from "@/lib/ai/provider";
-import { prisma } from "@/lib/db";
+import { prisma, ensureDbReady } from "@/lib/db";
 import { CURRENT_MONTH } from "@/lib/swiggy/seed";
 import { PRODUCTS, RESTAURANTS, MENU_ITEMS } from "@/lib/swiggy/seed";
 import type { OrderItem } from "@/lib/swiggy/types";
@@ -234,6 +234,7 @@ export async function getAvailableMonths(): Promise<string[]> {
 /* ─── Main report generator ─── */
 
 export async function getHealthReport(month?: string): Promise<HealthReport> {
+  await ensureDbReady();
   const targetMonth = month ?? CURRENT_MONTH;
   return cached(`health:${targetMonth}`, 300, async () => {
     const snapshot = await prisma.healthSnapshot.findUnique({
